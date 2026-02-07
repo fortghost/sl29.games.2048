@@ -73,7 +73,26 @@ def test__ajouter_tuile():
 
 def test__supprimer_zeros():
     print("----> Tests de _supprimer_zeros...")
-    raise NotImplementedError("Tests de _supprimer_zeros non implémentés.")
+    #on définit plusieurs cas de test
+    ligne_a_tester = [
+        [0, 2, 4, 0],
+        [0, 0, 2, 2],
+        [2, 2, 2, 2],
+        [0, 0, 0, 0]
+    ]
+
+    resultats = [
+        [2, 4],
+        [2, 2],
+        [2, 2, 2, 2],
+        []
+    ]
+
+    #on vérifie chaque ligne par rapport à son résultats attendu
+    for i in range(len(ligne_a_tester)):
+        ligne = ligne_a_tester[i]
+        attendu = resultats[i]
+        assert _supprimer_zeros(ligne) == attendu, f"erreur sur la ligne {ligne}"
     print("OK")
 
 def test__fusionner():
