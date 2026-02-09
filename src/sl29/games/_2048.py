@@ -1,6 +1,7 @@
 """Module providing the logic of the 2048 game"""
 
 import random
+import copy
 from typing import List, Tuple
 
 TAILLE:int = 4
@@ -17,7 +18,11 @@ def nouvelle_partie() -> Tuple[List[List[int]], int]:
     :return: Une grille TAILLExTAILLE initialisée avec deux tuiles, ainsi que le score à 0.
     :rtype: Tuple[List[List[int]], int]
     """
-    raise NotImplementedError("Fonction nouvelle_partie non implémentée.")
+    plateau = _creer_plateau_vide()
+    plateau1 = _ajouter_tuile(plateau)
+    plateau2 = _ajouter_tuile(plateau1)
+    return plateau2, 0
+    
 
 def jouer_coup(plateau: List[List[int]], direction: str) -> tuple[List[List[int]], int, bool]:
     """
@@ -70,11 +75,11 @@ def _ajouter_tuile(plateau: List[List[int]]) -> List[List[int]]:
     :return: Une nouvelle grille avec une tuile ajoutée.
     :rtype: List[List[int]]
     """
-    cases_vides = _get_cases_vides(plateau)
-    if cases_vides:
-        i, j = random.choices(cases_vides)
-        plateau[i][j] = 2
-    return plateau
+    n_plateau = copy.deepcopy(plateau)
+    mes_cases_vides = _get_cases_vides(plateau)
+    (i, j) = random.choice(mes_cases_vides)
+    n_plateau[i][j] = 2
+    return n_plateau
 
 def _supprimer_zeros(ligne: List[int]) -> List[int]:
     """
@@ -100,7 +105,19 @@ def _fusionner(ligne: List[int]) -> Tuple[List[int], int]:
     :return: La ligne après fusion, les points gagnés
     :rtype: Tuple[List[int], int]
     """
-    raise NotImplementedError("Fonction _fusionner non implémentée.")
+    liste_fusionnee = []
+    point = 0
+    i = 0
+    while i < len(ligne):
+        if i + 1 < len(ligne) and ligne[i] == ligne(i+1):
+            fusion = ligne[i] + ligne[i+1]
+            point += fusion
+            liste_fusionnee.append(fusion)
+            i += 2
+        else:
+            liste_fusionnee(ligne[i])
+            i += 1
+    return liste_fusionnee, point
 
 def _completer_zeros(ligne): # ajouter les annotations de type
     """
