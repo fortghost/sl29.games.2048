@@ -123,19 +123,33 @@ def _completer_zeros(ligne): # ajouter les annotations de type
     """
     DOCSTRING À ECIRE
     """
-    raise NotImplementedError("Fonction _completer_zeros non implémentée.")
+    while len(ligne) < 4:
+        ligne.append(0)
+    return ligne
+        
 
 def _deplacer_gauche(plateau) : # ajouter les annotations de type
     """
     DOCSTRING À ÉCRIRE
     """
-    raise NotImplementedError("Fonction _deplacer_gauche non implémentée.")
+    new_plateau = []
+    new_score = 0
+    for ligne in plateau:
+        ligne_sans_zero = _supprimer_zeros(ligne)
+        ligne_fusionnee, point = _fusionner(ligne_sans_zero)
+        new_score = new_score + point
+        ligne_finale = _completer_zeros(ligne_fusionnee)
+        new_plateau.append(ligne_finale)
+    return new_plateau, new_score
 
 def _inverser_lignes(plateau): # ajouter les annotations de type
     """
     DOCSTRING À ÉCRIRE
     """
-    raise NotImplementedError("Fonction _inverser_lignes non implémentée.")
+    result =[]
+    for ligne in plateau:
+        result.append(ligne[::-1])
+    return result
 
 def _deplacer_droite(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     """
@@ -146,7 +160,10 @@ def _deplacer_droite(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     :return: Un tuple contenant la nouvelle grille après déplacement et les points gagnés.
     :rtype: Tuple[List[List[int]], int]
     """
-    raise NotImplementedError("Fonction _deplacer_droite non implémentée.")
+    plateau_inverse = _inverser_lignes(plateau)
+    plateau_jouer_g, score = _deplacer_gauche(plateau_inverse)
+    plateau_final = _inverser_lignes(plateau_jouer_g)
+    return plateau_final, score
 
 def _transposer(plateau): # ajouter les annotations de type
     """
