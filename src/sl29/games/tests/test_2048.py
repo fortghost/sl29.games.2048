@@ -164,22 +164,82 @@ def test__deplacer_gauche():
 
 def test__inverser_lignes():
     print("----> Tests de _inverser_lignes...")
-    raise NotImplementedError("Tests de _inverser_lignes non implémentés.")
+    plateau = [
+        [4, 0, 0, 0],
+        [4, 4, 0, 0],
+        [8, 0, 0, 0],
+        [8, 4, 4, 0]
+        
+    ]
+    plateau_attendu = [
+        [0, 0, 0, 4],
+        [0, 0, 4, 4],
+        [0, 0, 0, 8],
+        [0, 4, 4, 8]
+    ]
+   
+    resultat  = _inverser_lignes(plateau)
+    assert resultat == plateau_attendu , f"jaurai du avoir ce plateau{plateau_attendu} mais j'ai eu ce plateau {resultat}"
     print("OK")
 
 def test__deplacer_droite():
     print("----> Tests de _deplacer_droite...")
-    raise NotImplementedError("Tests de _deplacer_droite non implémentés.")
+    plateau = [
+        [2, 2, 0, 0],
+        [2, 2, 2, 2],
+        [0, 0, 4, 4],
+        [8, 4, 2, 2]
+    ]
+    # Rappel : [2,2,2,2] -> [4,4,0,0] (8 pts)
+    # [8,4,2,2] -> [8,4,4,0] (4 pts)
+    attendu_p = [
+        [0, 0, 0, 4],
+        [0, 0, 4, 4],
+        [0, 0, 0, 8],
+        [0, 4, 4, 8]
+    ]
+    attendu_pts = 4 + 8 + 8 + 4 # 24 points
+
+    resultat, points = _deplacer_gauche(plateau)
+    assert resultat == attendu_p, f" j'ai obtenu {plateau} maisj 'aurai du avoir {attendu_p}"
+    assert points == attendu_pts
     print("OK")
 
 def test__transposer():
     print("----> Tests de _transposer...")
-    raise NotImplementedError("Tests de _transposer non implémentés.")
+    # Test : transforme les lignes en colonnes
+    plateau = [
+        [4, 0, 0, 0],
+        [4, 4, 0, 0],
+        [8, 0, 0, 0],
+        [8, 4, 4, 0]
+        
+    ]
+    plateau_attendu = [
+        [4, 4, 8, 8],
+        [0, 4, 0, 4],
+        [0, 0, 0, 4],
+        [0, 0, 0, 0]
+    ]
+    resultat = _transposer(plateau)
+    assert resultat == plateau_attendu, f"j'ai obtenu {plateau} mais j'aurai du avoir {plateau_attendu}"
     print("OK")
 
 def test__deplacer_haut():
     print("----> Tests de _deplacer_haut...")
-    raise NotImplementedError("Tests de _deplacer_haut non implémentés.")
+    # Test : tassement vers le haut avec fusion
+    grille = [
+        [2, 0, 0, 0],
+        [2, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+    attendu = [
+        [4, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
     print("OK")
 
 def test__deplacer_bas():

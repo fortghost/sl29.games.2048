@@ -35,8 +35,34 @@ def jouer_coup(plateau: List[List[int]], direction: str) -> tuple[List[List[int]
     :return: Retourne un tuple (nouveau_plateau, points, est_fini).
     :rtype: tuple[List[List[int]], int, bool]
     """
+    nouveau_plateau = [ligne[:] for ligne in plateau] # On copie pour ne pas modifier l'original
+    points = 0
+    est_fini = False
+    
+    if direction == 'g':
+        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
+    elif direction == 'd':
+        # Astuce : inverser, aller à gauche, ré-inverser
+        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
+        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
+        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
+    elif direction == 'h':
+        # Ici il faudra utiliser une fonction transposer
+        nouveau_plateau = _transposer(nouveau_plateau)
+        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
+        nouveau_plateau = _transposer(nouveau_plateau)
+    elif direction == 'b':
+        nouveau_plateau = _transposer(nouveau_plateau)
+        # Bas = Droite sur une grille transposée
+        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
+        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
+        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
+        nouveau_plateau = _transposer(nouveau_plateau)
 
-    raise NotImplementedError("Fonction jouer_coup non implémentée.")
+    # Vérification si le mouvement a changé quelque chose
+    # (Si rien ne bouge, on ne rajoute pas de tuile normalement)
+    
+    return nouveau_plateau, points, est_fini
 
 # ==========================================================
 # 🔒 FONCTIONS PRIVÉES (LOGIQUE INTERNE)
@@ -169,7 +195,12 @@ def _transposer(plateau): # ajouter les annotations de type
     """
     DOCSTRING À ÉCRIRE
     """
-    raise NotImplementedError("Fonction _transposer non implémentée.")
+    taille = len(plateau)
+    nouvelle_grille = [[0] * taille for _ in range(taille)]
+    for l in range(taille):
+        for c in range(taille):
+            nouvelle_grille[c][l] = plateau[l][c]
+    return nouvelle_grille
 
 def _deplacer_haut(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     """
@@ -178,7 +209,10 @@ def _deplacer_haut(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     :param plateau: La grille actuelle du jeu.
     :return: Un tuple contenant la nouvelle grille après déplacement et les points gagnés.
     """
-    raise NotImplementedError("Fonction _deplacer_haut non implémentée.")
+    grille_t = _transposer(plateau)
+    # On imagine que _deplacer_gauche renvoie (grille, score)
+    nouvelle_grille_t, points = _deplacer_gauche(grille_t)
+    return _transposer(nouvelle_grille_t), points
 
 
 def _deplacer_bas(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
@@ -188,7 +222,9 @@ def _deplacer_bas(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     :param plateau: La grille actuelle du jeu.
     :return: Un tuple contenant la nouvelle grille après déplacement et les points gagnés.
     """
-    raise NotImplementedError("Fonction _deplacer_bas non implémentée.")
+    grille_t = _transposer(plateau)
+    nouvelle_grille_t, points = _deplacer_droite(grille_t)
+    return _transposer(nouvelle_grille_t), points
 
 def _partie_terminee(plateau: List[List[int]]) -> bool:
     """
@@ -198,4 +234,19 @@ def _partie_terminee(plateau: List[List[int]]) -> bool:
     # Partie non terminee si il y a des fusions possibles (horizontale ou verticale)
     # Sinon c'est vrai
 
-    raise NotImplementedError("Fonction _partie_terminee non implémentée.")
+    # 1. On cherche s'il reste une case vide
+    for ligne in plateau:
+        if 0 in ligne:
+            return False
+            
+    # 2. On cherche une fusion possible (voisins identiques)
+    for l in range(4):
+        for c in range(4):
+            # Test voisin de droite
+            if c < 3 and plateau[l][c] == plateau[l][c+1]:
+                return False
+            # Test voisin du bas
+            if l < 3 and plateau[l][c] == plateau[l+1][c]:
+                return False
+                
+    return True
