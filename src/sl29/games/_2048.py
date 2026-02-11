@@ -25,43 +25,31 @@ def nouvelle_partie() -> Tuple[List[List[int]], int]:
     
 
 def jouer_coup(plateau: List[List[int]], direction: str) -> tuple[List[List[int]], int, bool]:
-    """
-    Effectuer un mouvement sur le plateau.
-
-    :param plateau: Une grille TAILLExTAILLE du jeu.
-    :type plateau: List[List[int]]
-    :param direction: La direction du déplacement : 'g' (gauche), 'd' (droite), 'h' (haut), 'b' (bas).
-    :type direction: str
-    :return: Retourne un tuple (nouveau_plateau, points, est_fini).
-    :rtype: tuple[List[List[int]], int, bool]
-    """
-    nouveau_plateau = [ligne[:] for ligne in plateau] # On copie pour ne pas modifier l'original
-    points = 0
-    est_fini = False
+    # 1. On garde une copie pour vérifier si ça a bougé
+    plateau_avant = copy.deepcopy(plateau)
     
+    # 2. On appelle tes fonctions de mouvement
     if direction == 'g':
-        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
+        nouveau_plateau, points = _deplacer_gauche(plateau)
     elif direction == 'd':
-        # Astuce : inverser, aller à gauche, ré-inverser
-        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
-        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
-        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
+        nouveau_plateau, points = _deplacer_droite(plateau)
     elif direction == 'h':
-        # Ici il faudra utiliser une fonction transposer
-        nouveau_plateau = _transposer(nouveau_plateau)
-        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
-        nouveau_plateau = _transposer(nouveau_plateau)
+        nouveau_plateau, points = _deplacer_haut(plateau)
     elif direction == 'b':
-        nouveau_plateau = _transposer(nouveau_plateau)
-        # Bas = Droite sur une grille transposée
-        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
-        nouveau_plateau = _deplacer_gauche(nouveau_plateau)
-        nouveau_plateau = [_inverser_lignes(l) for l in nouveau_plateau]
-        nouveau_plateau = _transposer(nouveau_plateau)
+        nouveau_plateau, points = _deplacer_bas(plateau)
+    else:
+        return plateau, 0, _partie_terminee(plateau)
 
-    # Vérification si le mouvement a changé quelque chose
-    # (Si rien ne bouge, on ne rajoute pas de tuile normalement)
-    
+    # 3. SI le mouvement a changé quelque chose, on ajoute une tuile
+    # (C'est ce que vérifie le Cas 1 et Cas 2 du test)
+    if nouveau_plateau != plateau_avant:
+        # Ici on appelle la fonction qui pose un 2 ou un 4 au hasard
+        # Elle s'appelle souvent 'ajouter_nouvelle_tuile' ou 'apparition'
+        nouveau_plateau = _ajouter_tuile(nouveau_plateau)
+
+    # 4. On vérifie si c'est fini
+    est_fini = _partie_terminee(nouveau_plateau)
+
     return nouveau_plateau, points, est_fini
 
 # ==========================================================
@@ -119,7 +107,7 @@ def _supprimer_zeros(ligne: List[int]) -> List[int]:
     nouvelle_ligne = []
     for nombre in ligne:
         if nombre != 0:
-            nouvelle_ligne.appends(nombre)
+            nouvelle_ligne.append(nombre)
     return nouvelle_ligne
 
 def _fusionner(ligne: List[int]) -> Tuple[List[int], int]:
@@ -131,19 +119,19 @@ def _fusionner(ligne: List[int]) -> Tuple[List[int], int]:
     :return: La ligne après fusion, les points gagnés
     :rtype: Tuple[List[int], int]
     """
-    liste_fusionnee = []
+    liste_fusionee = []
     point = 0
     i = 0
     while i < len(ligne):
-        if i + 1 < len(ligne) and ligne[i] == ligne(i+1):
-            fusion = ligne[i] + ligne[i+1]
-            point += fusion
-            liste_fusionnee.append(fusion)
+        if i + 1 < len(ligne) and ligne[i] == ligne[i+1]:
+            fusion = ligne[i] + ligne[i + 1]
+            point = point + fusion
+            liste_fusionee.append(fusion)
             i += 2
         else:
-            liste_fusionnee(ligne[i])
+            liste_fusionee.append(ligne[i])
             i += 1
-    return liste_fusionnee, point
+    return liste_fusionee, point
 
 def _completer_zeros(ligne): # ajouter les annotations de type
     """
@@ -191,15 +179,20 @@ def _deplacer_droite(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     plateau_final = _inverser_lignes(plateau_jouer_g)
     return plateau_final, score
 
-def _transposer(plateau): # ajouter les annotations de type
+def _transposer(plateau: list[list[int]]) -> list[list[int]]:
     """
-    DOCSTRING À ÉCRIRE
+    Retourne une nouvelle grille où les lignes du plateau deviennent des colonnes.
     """
-    taille = len(plateau)
-    nouvelle_grille = [[0] * taille for _ in range(taille)]
-    for l in range(taille):
-        for c in range(taille):
+    TAILLE = len(plateau)
+    # 1. On crée d'abord une grille remplie de 0
+    nouvelle_grille = [[0] * TAILLE for _ in range(TAILLE)]
+    
+    # 2. On remplit avec les valeurs du plateau d'origine
+    for l in range(TAILLE):
+        for c in range(TAILLE):
+            # La ligne 'l' devient la colonne 'l'
             nouvelle_grille[c][l] = plateau[l][c]
+            
     return nouvelle_grille
 
 def _deplacer_haut(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
@@ -209,10 +202,10 @@ def _deplacer_haut(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     :param plateau: La grille actuelle du jeu.
     :return: Un tuple contenant la nouvelle grille après déplacement et les points gagnés.
     """
-    grille_t = _transposer(plateau)
-    # On imagine que _deplacer_gauche renvoie (grille, score)
-    nouvelle_grille_t, points = _deplacer_gauche(grille_t)
-    return _transposer(nouvelle_grille_t), points
+    plateau_h = _transposer(plateau)
+    #on imagine que _deplacer_gauche renvoie (plateau, score)
+    nouveau_plateau_h, score = _deplacer_gauche(plateau_h)
+    return _transposer(nouveau_plateau_h), score
 
 
 def _deplacer_bas(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
@@ -222,31 +215,35 @@ def _deplacer_bas(plateau: List[List[int]]) -> Tuple[List[List[int]], int]:
     :param plateau: La grille actuelle du jeu.
     :return: Un tuple contenant la nouvelle grille après déplacement et les points gagnés.
     """
-    grille_t = _transposer(plateau)
-    nouvelle_grille_t, points = _deplacer_droite(grille_t)
-    return _transposer(nouvelle_grille_t), points
+    plateau_b = _transposer(plateau)
+    #on imagine que _deplacer_gauche renvoie (plateau, score)
+    nouveau_plateau_b, score = _deplacer_droite(plateau_b)
+    return _transposer(nouveau_plateau_b), score
+
 
 def _partie_terminee(plateau: List[List[int]]) -> bool:
     """
-    DOCSTRING À ÉCRIRE
+    Retourne True si aucune case n'est vide et aucune fusion n'est possible.
     """
-    # Partie non terminee si il y a des cases vides
-    # Partie non terminee si il y a des fusions possibles (horizontale ou verticale)
-    # Sinon c'est vrai
+    TAILLE = len(plateau)
 
-    # 1. On cherche s'il reste une case vide
-    for ligne in plateau:
-        if 0 in ligne:
-            return False
-            
-    # 2. On cherche une fusion possible (voisins identiques)
-    for l in range(4):
-        for c in range(4):
-            # Test voisin de droite
-            if c < 3 and plateau[l][c] == plateau[l][c+1]:
+    # 1. On cherche une case vide (0)
+    for l in range(TAILLE):
+        for c in range(TAILLE):
+            if plateau[l][c] == 0:
                 return False
-            # Test voisin du bas
-            if l < 3 and plateau[l][c] == plateau[l+1][c]:
+
+    # 2. On cherche une fusion horizontale possible
+    for l in range(TAILLE):
+        for c in range(TAILLE - 1): # -1 pour ne pas sortir de la grille
+            if plateau[l][c] == plateau[l][c + 1]:
                 return False
-                
+
+    # 3. On cherche une fusion verticale possible
+    for l in range(TAILLE - 1):
+        for c in range(TAILLE):
+            if plateau[l][c] == plateau[l + 1][c]:
+                return False
+
+    # Si on arrive ici, c'est que tout est bloqué
     return True
